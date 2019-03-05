@@ -28,3 +28,4 @@ script:
   - cd slides
   - ./gradlew asciidoc
   - mv build/asciidoc/html5/java-module-system.html build/asciidoc/html5/index.html
+  - sed -i 's/http:\/\/cdnjs.cloudflare.com/https:\/\/cdnjs.cloudflare.com/g' build/asciidoc/html5/index.html
