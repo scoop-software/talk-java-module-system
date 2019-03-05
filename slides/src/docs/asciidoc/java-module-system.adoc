@@ -1,0 +1,1112 @@
+
+= The Java Module System in practice
+:example-caption!:
+:deckjs_transition: fade
+:deckjs_theme: slides
+:navigation:
+:menu:
+:goto:
+:source-highlighter: prettify
+:mainjava: src/main/java
+:mainpath: {mainjava}/org/example/jpms
+:testjava: src/test/java
+:testpath: {testjava}/org/example/jpms
+:slide-start: pass:[<section class="slide"><div>]
+:slide-end: pass:[</div></section>]
+:vspace: pass:[&nbsp;<br>]
+:hspace: pass:[&nbsp; &nbsp; ]
+
+== JDK Distributions
+
+[cols="10,10,20,20,10,10,10",options="header"]
+|===
+ | Release  | GA Date  | Oracle             | Azul               | RedHat   | AdoptOpenJDK | Corretto
+s| Java 8  s| 03.2014 s| 03.2022 (03.2025) s| 03.2024 (03.2026) s| 06.2023 s| 09.2023     s| 06.2023+++</strong><sup>1</sup>+++
+ | Java 9   | 09.2017  | 03.2018            | 03.2020 (03.2021)  | -        | 03.2018      | -
+ | Java 10  | 03.2018  | 09.2018            | 09.2018            | -        | 09.2018      | -
+s| Java 11 s| 09.2018 s| 09.2023 (09.2026) s| 09.2028 (09.2030) s| 10.2024 s| 09.2022     s| 08.2024
+ | Java 12  | 03.2019  | 09.2019            | 09.2019            | -        | 09.2019      | -
+ | Java 13  | 09.2019  | 03.2020            | 03.2023 (03.2024)  | -        | 03.2020      | -
+7+| ...
+s| Java 17 s| 09.2021 s| 09.2026 (09.2029) s| 09.2031 (09.2033) s| ?       s| ?           s| ?
+|===
+
++++ +++
+
+^1^ This distribution also contains JavaFX
+
+
+== The Java Module System - History
+
+[%step]
+* June 2005: https://jcp.org/en/jsr/detail?id=277[JSR-277: Java(TM) Module System] created
+* May 2006: https://jcp.org/en/jsr/detail?id=294[JSR-294: Improved Modularity Support in the Java(TM) Programming Language] created
+* August 2008: https://openjdk.java.net/projects/jigsaw/[Project Jigsaw] created
+* July 2011: Java 7 released (without module system)
+* July 2014: Java 8 released (without module system)
+* November 2014: https://jcp.org/en/jsr/detail?id=376[JSR-376: Java(TM) Platform Module System] created
+* September 2015: Project Jigsaw releases its first prototype
+* January 2016: JSR-277 and JSR-294 withdrawn
+* July 2017: Project Jigsaw completed
+* September 2017: Java 9 released with the module system
+
+
+== The Java Module System - Basics
+
+[%step]
+
+* *module*: a named set of packages, resources, and native libraries
+* *modularization*: the act of decomposing a system into self-contained but interconnected modules
+
+{vspace}
+
+[slide]#pass:[<span class="note-right">&nbsp;Modularization is not mandatory.</span><br>&nbsp;<br>]#
+
+[slide]#pass:[<span class="note-right">&nbsp;Partial modularization is also possible.</span>]#
+
+
+== The Java Module System - Features
+
+[%step]
+
+* Strong encapsulation
+** a module is able to conceal parts of its code from other modules
+** clear separation between publicly usable code and internal implementation code
+
+* Well-defined interfaces
+** code that is not encapsulated is part of the pubic API of a module
+** modules should expose well-defined and stable interfaces to other modules
+
+
+* Explicit dependencies
+** dependencies must be part of the module definition
+** explicit dependencies give rise to a module graph +
+{hspace} (cyclic dependencies not allowed)
+
+== Java SE Modules  (2010)
+
+[.thumb]
+image::modules-2010.png[width=2000]
+
+[small]#Source: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+== Java SE Modules  (Java 9)
+
+[.thumb]
+image::modules-java9.jpg[width=2000]
+
+[small]#Adapted from: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+== Java SE Modules  (Java 9)
+
+[.thumb]
+image::modules-java9-deprecated.jpg[width=2000]
+
+[small]#Adapted from: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+== Java SE Modules  (Java 11)
+
+[.thumb]
+image::modules-java11.jpg[width=2000]
+
+[small]#Adapted from: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+
+== Other modules
+
+NOTE: Modules shown in [red]#red color# have been removed in Java 11. +
+
++++ +++
+
+[cols="5",options="header"]
+|===
+5+| JDK modules
+a| jdk.accessibility +
+jdk.attach +
+jdk.charsets +
+jdk.compiler +
+jdk.crypto.cryptoki +
+jdk.crypto.ec +
+jdk.dynalink +
+jdk.editpad +
+jdk.hotspot.agent
+a| jdk.httpserver +
+[red]#jdk.incubator.httpclient#^1^ +
+jdk.jartool +
+jdk.javadoc +
+jdk.jcmd +
+jdk.jconsole +
+jdk.jdeps +
+jdk.jdi +
+jdk.jdwp.agent
+a| jdk.jfr +
+jdk.jlink +
+jdk.jshell +
+jdk.jsobject +
+jdk.jstatd +
+jdk.localedata +
+jdk.management +
+jdk.management.agent +
+[red]#jdk.management.cmm#
+a| jdk.management.jfr +
+[red]#jdk.management.resource# +
+jdk.naming.dns +
+jdk.naming.rmi +
+jdk.net +
+jdk.pack +
+[red]#jdk.packager.services# +
+[red]#jdk.policytool#^2^ +
+jdk.rmic
+a| jdk.scripting.nashorn +
+jdk.sctp +
+jdk.security.auth +
+jdk.security.jgss +
+[red]#jdk.snmp# +
+jdk.xml.dom +
+jdk.zipfs
+|===
+[small]#^1^ Promoted to Java SE as _java.net.http_# +
+[small]#^2^ Removed in Java 10#
+
+- [red]#*JavaFX modules*# - removed in Java 11; available as standalone library: https://openjfx.io[OpenJFX]
+- *Other modules*: [red]#java.jnlp#, java.smartcardio
+
+TIP: Execute `java --list-modules` to get the full list of platform modules.
+
+== Replacements for removed modules
+
+[cols=".^20,.^40,.^60",options="header"]
+|===
+| Module name  | Package | Maven artifact
+| java.activation | javax.activation.* | com.sun.activation:javax.activation:1.2.0
+| java.corba   | javax.activity.* +
+javax.rmi.* +
+org.omg.* | org.jboss.openjdk-orb:openjdk-orb:8.1.2.Final
+| java.transaction | javax.transaction.* | javax.transaction:javax.transaction-api:1.3
+| java.xml.bind | javax.xml.bind.* | org.glassfish.jaxb:jaxb-runtime:2.3.2
+| java.xml.ws   | javax.xml.ws.* +
+javax.jws.* +
+javax.soap.* | com.sun.xml.ws:jaxws-ri:2.3.2
+| java.xml.ws.annotation | javax.annotation.* | javax.annotation:javax.annotation-api:1.3.2
+|===
+
+// Example error message: package javax.xml.bind does not exist
+
+
+== Live demo - dealing with removed modules
+[headnote]#(Code from prj-1)#
+
+[source,scrollablecontent]
+.Product.java [small]#(scroll to see more code)#
+----
+include::{basedir}/prj-1/{mainpath}/Product.java[indent=0]
+----
+
+== Live demo - dealing with removed modules
+[headnote]#(Code from prj-1)#
+
+[source]
+.ProductTest.java
+----
+include::{basedir}/prj-1/{testpath}/ProductTest.java[indent=0]
+----
+
+== Live demo - dealing with removed modules
+[headnote]#(Code from prj-1)#
+
+[source]
+.XMLPrinter.java
+----
+include::{basedir}/prj-1/{mainpath}/XMLPrinter.java[indent=0]
+----
+
+== Live demo - dealing with removed modules
+[headnote]#(Code from prj-1)#
+
+{slide-start}
+[source]
+.Execute:
+----
+./gradlew run
+----
+{slide-end}
+
+{slide-start}
+[source]
+.With JDK 8:
+----
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<product>
+    <id>100</id>
+    <name>pizza</name>
+    <price>3.25</price>
+</product>
+----
+{slide-end}
+
+
+{slide-start}
+[source,bash]
+.With JDK 11:
+----
+Error: package javax.xml.bind.annotation does not exist
+----
+{slide-end}
+
+{slide-start}
+[source]
+.To fix the error, add to build.gradle:
+----
+implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+----
+{slide-end}
+
+
+== Module descriptors
+[.thumb]
+image::module-info.png[width=804]
+
+[cols="49a,2a,49a",frame=none,grid=none]
+|===
+|
+{slide-start}
+
+The module descriptor specifies:
+
+* the module's name (usually in reverse DNS notation)
+* the module’s dependencies
+* the packages made available to other modules
+* the services used and provided by this module
+
+{slide-end}
+|
+|
+{slide-start}
+
+A type in one module is accessible by code +
+in another module only if:
+
+* the type is public
+* the package is exported
+* the second module reads the first
+
+{slide-end}
+|===
+
+== Module descriptors
+
+[cols="62a,38a",frame=none,grid=none]
+|===
+|
+{vspace}
+module-info.java
+
+[source]
+----
+module java.prefs {
+    requires java.xml;
+
+    exports java.util.prefs;
+}
+----
+
+{slide-start}
+
+* _java.prefs_ can access types from the packages exported by _java.xml_ +
+(_java.prefs_ [purple]#reads# the _java.xml_ module)
+{slide-end}
+
+{slide-start}
+
+* _java.prefs_ exposes its _java.util.prefs_ package to other modules
+{slide-end}
+
+| [.thumb]
+image::java.prefs.png[]
+
+|===
+
+== Module descriptors
+
+[cols="62a,38a",frame=none,grid=none]
+|===
+|
+{vspace}
+module-info.java
+
+[source]
+----
+module java.datatransfer {
+    exports java.awt.datatransfer;
+
+    exports sun.datatransfer to java.desktop;
+}
+----
+
+{slide-start}
+
+* _java.datatransfer_ exposes the _java.awt.datatransfer_ package to all other modules
+{slide-end}
+
+{slide-start}
+
+* _java.datatransfer_ exposes the _sun.datatransfer_ package only to the _java.desktop_ module
+
+** This is a *qualified export*
+{slide-end}
+
+| [.thumb]
+image::java.datatransfer.png[]
+
+|===
+
+== Module descriptors - implied readability
+
+
+[source]
+.java/sql/Driver.java
+----
+package java.sql;
+
+import java.util.logging.Logger;
+
+public interface Driver {
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException;
+    ...
+}
+----
+
+[slide]#_Driver_ exposes types from the _java.logging_ module in its own public API.#
+
+
+{slide-start}
+[cols="40a,5a,55a",frame=none,grid=none]
+|===
+|
+[source]
+.module-info.java
+----
+module java.sql {
+    requires transitive java.logging;
+    ...
+}
+----
+
+|
+.^| _java.sql_ grants readability to _java.logging_ to any module that depends upon it.
+|===
+
+{slide-end}
+
+
+== Aggregator Modules
+
+[.thumb]
+image::java.se.11.jpg[]
+
+[source]
+----
+module java.se {
+    requires transitive java.compiler;
+    requires transitive java.datatransfer;
+    requires transitive java.desktop;
+    requires transitive java.instrument;
+    requires transitive java.logging;
+    requires transitive java.management;
+    ...
+}
+----
+
+
+== Module descriptors: services
+[headnote]#(Code from prj-4)#
+
+[cols="56a,2a,42a",frame=none,grid=none]
+|===
+|
+
+* How can a modular application use some kind of plug-ins?
+
+* How can a module be wired with other modules only during run-time?
+|
+
+|
+[source,slide]
+----
+include::{basedir}/prj-4/compressor/{mainpath}/zip/Compressor.java[tags=class,indent=0]
+----
+|===
+
+{slide-start}
+
+[cols="49a,2a,49a",frame=none,grid=none]
+|===
+|
+[source]
+.module org.example.jpms.lzw
+----
+include::{basedir}/prj-4/lzw/{mainpath}/lzw/LZWCompressor.java[tags=class,indent=0]
+----
+|
+|
+[source]
+.module org.example.jpms.huffman
+----
+include::{basedir}/prj-4/huffman/{mainpath}/huffman/HuffmanCompressor.java[tags=class,indent=0]
+----
+|===
+{slide-end}
+
+
+== Module descriptors: services
+[headnote]#(Code from prj-4)#
+
+[cols="44a,1a,55a",frame=none,grid=none]
+|===
+|
+[source]
+----
+include::{basedir}/prj-4/compressor/{mainjava}/module-info.java[indent=0]
+----
+|
+|
+[source]
+----
+include::{basedir}/prj-4/compressor/{mainpath}/zip/Compressor.java[tags=class,indent=0]
+----
+|===
+
+
+[source]
+----
+include::{basedir}/prj-4/lzw/{mainjava}/module-info.java[indent=0]
+----
+
+[source]
+----
+include::{basedir}/prj-4/huffman/{mainjava}/module-info.java[indent=0]
+----
+
+
+== Module descriptors: services
+[headnote]#(Code from prj-4)#
+
+[cols="44a,1a,55a",frame=none,grid=none]
+|===
+|
+[source]
+----
+include::{basedir}/prj-4/compressor/{mainjava}/module-info.java[indent=0]
+----
+
+[source]
+----
+include::{basedir}/prj-4/app/{mainjava}/module-info.java[tags=module,indent=0]
+----
+|
+|
+
+[source]
+----
+include::{basedir}/prj-4/compressor/{mainpath}/zip/Compressor.java[tags=class,indent=0]
+----
+
+|===
+
+
+[source]
+----
+include::{basedir}/prj-4/app/{mainpath}/app/App.java[tags=class,indent=0]
+----
+
+== Module descriptors: services
+[headnote]#(Code from prj-5)#
+
+[cols="44a,1a,55a",frame=none,grid=none]
+|===
+|
+[source]
+----
+include::{basedir}/prj-5/compressor/{mainjava}/module-info.java[tags=module,indent=0]
+----
+
+[source]
+----
+include::{basedir}/prj-5/app/{mainjava}/module-info.java[indent=0]
+----
+|
+|
+
+[source]
+----
+include::{basedir}/prj-5/compressor/{mainpath}/zip/Compressor.java[tags=class,indent=0]
+----
+
+|===
+
+
+
+[source]
+----
+include::{basedir}/prj-5/app/{mainpath}/app/App.java[tags=class,indent=0]
+----
+
+
+== Opening modules for deep reflection
+
+[cols="44a,1a,55a",frame=none,grid=none]
+|===
+|
+Popular tools that use reflection:
+
+* Spring (dependency injection)
+* JUnit (unit test execution)
+* Hibernate (persistence)
+* Copper (workflow processing)
+* JAXB (XML serialization)
+* Jackson (JSON serialization)
+* FindBugs / SpotBugs (code analysis)
+* any other tools that process annotations
+
+|
+|
+{slide-start}
+A module needs to be able to:
+
+* provide access to internal types without exporting packages
+* allow reflective access to *all* parts of these types +
+(_exports_ doesn't solve this problem)
+{slide-end}
+|===
+
+== Opening modules for deep reflection
+
+[cols="29a,1a,70a",frame=none,grid=none]
+|===
+|
+[source]
+----
+@XmlRootElement
+public class Product {
+    private int id;
+    private String name;
+    private double price;
+
+    ...
+
+}
+----
+|
+|
+[source]
+----
+public static void main(String[] args) throws Exception {
+    Product product = new Product(100, "pizza", 3.25);
+    JAXBContext jaxbContext =
+                    JAXBContext.newInstance(Product.class);
+    Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+    jaxbMarshaller.setProperty(
+                    Marshaller.JAXB_FORMATTED_OUTPUT, true);
+    jaxbMarshaller.marshal(product, System.out);
+}
+----
+|===
+
+{slide-start}
+[source]
+----
+module org.example.jpms {
+    requires java.xml.bind;
+    opens org.example.jpms to java.xml.bind;
+}
+----
+
+* It's not necessary to export the _org.example.jpms_ package
+{slide-end}
+
+
+== Opening modules for deep reflection
+
+[source]
+.Making a module open
+----
+open module org.example.jpms {
+    ....
+}
+----
+{vspace}
+[source]
+.Making a package open for all modules
+----
+module org.example.jpms {
+    opens org.example.jpms.impl;
+}
+----
+{vspace}
+[source]
+.Qualified _opens_
+----
+module org.example.jpms {
+    opens org.example.jpms.impl to org.example.tool;
+}
+----
+
+== VM arguments to break encapsulation
+
+Options for the `javac` and `java` tools:
+
+[%step]
+
+* [bold]#`--add-exports module/package=other-module(,other-module)*`# +
+Specifies a package to be considered as exported from its defining module to additional modules. +
+{vspace} +
+{vspace}
+
+* [bold]#`--add-reads module=other-module(,other-module)*`# +
+Specifies additional modules to be considered as required by a given module. +
+{vspace} +
+{vspace}
+
+* [bold]#`--add-opens module/package=target-module(,target-module)*`# +
+Updates module to open package to target-module, regardless of module declaration. +
+(has no effect on javac)
+
+== Classpath and module path
+
+Modules are resolved from the *module path*.
+
+{slide-start}
+
+* *classpath*: allows managing the available types only as a flat list
+
+* *module path*: allows efficient indexing based on information from the module descriptors
+** The Java runtime and the compiler know in which module to look for a given type
+
+{slide-end}
+
+
+{slide-start}
+
+Specifying the module path with the `javac` and `java` tools:
+
+[bold]#`--module-path modulepath...`# +
+{hspace} or +
+[bold]#`-p modulepath...`#
+
+{hspace} _modulepath_: a list of directories of modules (containing exploded modules, modular jars or jmod files).
+
+{slide-end}
+
+
+== Classpath and module path
+
+You can mix `--class-path` and `--module-path`.
+
+* modular jar on the module-path
+* modular jar on the classpath
+* non-modular jar on the module-path
+* non-modular jar on the classpath
+
+{slide-start}
+All code on the classpath is part of the *unnamed module*, which:
+
+* exports all code on the classpath
+* reads all other modules
+* it is readable only from _automatic modules_!
+
+{slide-end}
+
+== Automatic modules
+Non-modular jars found on the module-path are turned into *automatic modules*.
+
+[%step]
+
+* A module descriptor is generated on the fly
+** it `requires transitive` all other resolved modules
+** it exports all its packages
+** it reads the _unnamed module_
+
+* The name of the automatic module:
+** if present: the `Automatic-Module-Name` attribute of the `META-INF/MANIFEST.MF` file +
+(highly recommended in order to prevent the pass:[<a href="https://blog.joda.org/2017/05/java-se-9-jpms-automatic-modules.html">module hell</a>])
+** otherwise: derived from the jar's name
+
+
+== Split packages
+
+[%step]
+* Packages are not allowed to span different modules. +
+{hspace} (This applies even for packages that are not exported.)
+
+* No classes are allowed in the default package.
+
+
+{slide-start}
+Dealing with split packages using the `javac` and `java` tools:
+
+[bold]#`--patch-module module=file(:file)*`# +
+{hspace} Merges all classes from a list of files into the given module.
+
+{slide-end}
+
+{slide-start}
+
+[source,html]
+.Example:
+----
+java
+  --module-path ...
+  --add-modules ...
+  --patch-module java.xml.ws.annotation=/path/to/my/lib/jsr305-3.0.2.jar
+  --module org.example.hello/org.example.hello.HelloWorld
+----
+
+{slide-end}
+
+
+== Live demo: Gradle without the _moduleplugin_
+[headnote]#(Code from prj-2)#
+
+*Several adjustments need to be made to build.gradle*
+
+{slide-start}
+[source]
+.To allow compilation:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=compile,indent=0]
+----
+{slide-end}
+
+{slide-start}
+[source]
+.To allow running:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=run,indent=0]
+----
+{slide-end}
+
+
+== Live demo: Gradle without the _moduleplugin_
+[headnote]#(Code from prj-2)#
+
+[source]
+.To allow testing:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=test,indent=0]
+----
+
+== Live demo: Gradle without the _moduleplugin_
+[headnote]#(Code from prj-2)#
+
+[source]
+.To fix the start scripts:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=startScripts,indent=0]
+----
+
+
+== Live demo: Gradle with the _moduleplugin_
+[headnote]#(Code from prj-2)#
+
+[source]
+----
+include::{basedir}/prj-2/build.plugin.gradle[indent=0]
+----
+
+== Live demo: Gradle with the _moduleplugin_
+[headnote]#(Code from prj-3)#
+
+Configuring additional VM arguments for testing
+[source]
+.module-info.test
+----
+include::{basedir}/prj-3/{testjava}/module-info.test[indent=0]
+----
+
+
+== Modular jars compatible with Java 8 (or earlier)
+
+*The "standard" approach*
+
+[%step]
+
+* from the build script start a GradleBuild task that executes `gradle jar` with a sourceSet that includes all classes except `module-info.java`.
+** this GradleBuild task runs in Java 8 (or older) compatibility mode.
+
+* from the build script start a GradleBuild task that executes `gradle jar` with a sourceSet that includes only `module-info.java`.
+** this GradleBuild task runs in Java 9 (or newer) compatibility mode.
+** the classpath of the java compiler needs to include the (Java 8 or older) jar assembled in the previous step.
+
+* merge the above two jars into a single one.
+
+
+
+== Modular jars compatible with Java 8 (or earlier)
+[headnote]#(Code from prj-6)#
+
+*The pass:[<a href="https://github.com/moditect/moditect/blob/master/README.md#adding-a-module-descriptor-to-the-project-jar">ModiTect</a>] approach*
+
+* analyze the `module-info.java` file with the pass:[<a href="https://github.com/javaparser/javaparser">JavaParser</a>]
+* use the pass:[<a href="https://asm.ow2.io/">ASM</a>] bytecode manipulation framework to generate the corresponding module descriptor
+
+{slide-start}
+
+Usage with the pass:[<a href="https://github.com/beryx/badass-jar-plugin/blob/master/README.adoc">org.beryx.jar</a>] Gradle plugin
+
+[source]
+----
+plugins {
+    id 'java'
+    id 'org.beryx.jar' version '1.1.3'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+----
+
+[cols="39a,1a,60a",frame=none,grid=none]
+|===
+|
+[source]
+.Create Java 8-compatible jar
+----
+./gradlew jar
+----
+|
+|
+[source]
+.Validate the module descriptor by building with Java 11
+----
+./gradlew -PjavaCompatibility=11 jar
+----
+|===
+
+
+{slide-end}
+
+
+
+== Multi-release jars
+
+{slide-start}
+
+* this feature allows packaging different versions of the same class file inside a single jar
+* at run-time, the JVM loads the most appropriate version
+* this feature is independent of the module system
+
+{slide-end}
+
+{slide-start}
+
+* the MANIFEST.MF of a multi-release jar contains the attribute *`Multi-Release: true`*
+* new versions of a class reside in the *`META-INF/versions/<n>`* directory, where `<n>` is a major Java version.
+
+{slide-end}
+
+
+[cols="60a,1a,39a",frame=none,grid=none]
+|===
+|
+
+{slide-start}
+
+The *`org.beryx.jar`* plugin creates multi-release jars by default
+[.thumb]
+image::multi-release-jar.png[width=822]
+
+{slide-end}
+|
+|
+{slide-start}
+
+How to prevent creating multi-release jars with the *`org.beryx.jar`* plugin:
+[source]
+----
+jar {
+    ...
+    multiRelease = false
+    ...
+}
+----
+
+{slide-end}
+|===
+
+
+
+== Other JDK tools
+
+[%step]
+
+* jdeps - shows the package-level or class-level dependencies of Java class files +
+{hspace} - can also be used to generate `module-info.java` files for the analyzed jars
+
+* jlink - assembles and optimizes a set of modules and their dependencies into a custom runtime image +
+{hspace} - a custom runtime image is a special distribution containing the bare minimum to run an application +
+{hspace} - you can create your own JRE +
+{hspace} - you can use jlink only if all artifacts in the dependency graph are modularized!
+
+* jdeprscan - scans a jar file for uses of deprecated API elements
+
+* jmod - creates JMOD files and lists the content of existing JMOD files
+
+* jimage - analyzes the lib/module file found in a custom runtime image
+
+
+== Custom runtime images for modular applications
+
+*The ModiTect approach:*
+
+* for each non-modularized artifact in the dependency graph:
+** generate a module descriptor and add it to the artifact
+
+{slide-start}
+
+ModiTect can be used with both Maven and Gradle.
+
+[cols="49a,2a,49a",frame=none,grid=none]
+|===
+|
+[source]
+.Maven
+----
+<plugins>
+  <plugin>
+    <groupId>org.moditect</groupId>
+    <artifactId>
+      moditect-maven-plugin
+    </artifactId>
+	  <executions>
+	  ...
+	  </executions>
+  </plugin>
+  ...
+</plugins>
+----
+|
+|
+[source]
+.Gradle
+----
+plugins{
+    id "java"
+    id "application"
+
+    id "org.moditect.gradleplugin"
+                       version "1.0.0-beta1"
+    ...
+}
+
+moditect {
+    ...
+}
+
+----
+|===
+
+{slide-end}
+
+
+
+== Custom runtime images for modular applications
+*The ModiTect approach*
+[headnote]#(Code from prj-7)#
+
+[source,scrollablecontent]
+.build.gradle [small]#(scroll to see more code)#
+----
+include::{basedir}/prj-7/build.gradle[indent=0]
+----
+
+
+
+== Custom runtime images for modular applications
+*The "badass" approach*
+
+* Combine all non-modular artifacts into a _merged module_.
+* Modularize the merged module.
+* Create _delegating modules_ for each artifact contained in the merged module.
+
+{vspace}
+
+{slide-start}
+
+This approach is taken by the pass:[<a href="https://github.com/beryx/badass-jlink-plugin/blob/master/README.md">badass-jlink</a>] Gradle plugin.
+
+* You can let the plugin generate a module descriptor for the merged module.
+* Or you can use the module descriptor suggested by the plugin as a starting point for a customized module descriptor.
+* The plugin doesn't use _jdeps_ to generate the module descriptor, because jdeps has some limitations and bugs.
+
+{slide-end}
+
+== Custom runtime images for modular applications
+
+[.thumb]
+image::merging.png[]
+
+== Custom runtime images for modular applications
+
+[.thumb]
+image::merging.cycle.png[]
+
+== Custom runtime images for modular applications
+
+[.thumb]
+image::merging.no-cycle.png[]
+
+
+== Custom runtime images for modular applications
+[headnote]#(Code from prj-8)#
+
+[source]
+.build.gradle for the "badass" approach
+----
+include::{basedir}/prj-8/build.gradle[indent=0]
+----
+
+== Custom runtime images for non-modular applications
+
+Approach:
+
+* create a custom runtime image containing only the JDK modules required by the application
+* use the Gradle Application Plugin to build your application
+* add your application to the custom Java runtime image
+
+{slide-start}
+
+This approach is taken by the pass:[<a href="https://github.com/beryx/badass-runtime-plugin/blob/master/README.md">badass-runtime</a>] Gradle plugin.
+
+{slide-end}
+
+
+== Custom runtime images for non-modular applications
+[headnote]#(Code from prj-9)#
+
+[source]
+.build.gradle
+----
+include::{basedir}/prj-9/build.gradle[indent=0]
+----
+
+
+
+== List of useful plugins
+
+* https://github.com/aalmiray/jdeps-gradle-plugin
+
+* https://github.com/aalmiray/jdeprscan-gradle-plugin
+
+* https://github.com/jonnyzzz/gradle-java9c
+
+* https://github.com/java9-modularity/gradle-modules-plugin
+
+* https://github.com/openjfx/javafx-gradle-plugin
+
+* https://github.com/moditect/moditect
+
+* https://github.com/moditect/moditect-gradle-plugin
+
+* https://github.com/beryx/badass-jar-plugin
+
+* https://github.com/beryx/badass-jlink-plugin
+
+* https://github.com/beryx/badass-runtime-plugin

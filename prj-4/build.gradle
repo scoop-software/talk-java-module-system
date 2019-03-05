@@ -1,0 +1,69 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.javamodularity:moduleplugin:1.4.0"
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+// dependencies.compile subprojects
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.javamodularity.moduleplugin'
+
+    sourceCompatibility = 11
+
+    def defaultEncoding = 'UTF-8'
+    [compileJava, compileTestJava]*.options*.encoding = defaultEncoding
+
+//    ext.moduleName = "org.example.jpms.$project.name"
+
+    jar {
+        manifest {
+            attributes 'Implementation-Title': "${project.archivesBaseName}",
+                    'Implementation-Version': "$project.version"
+        }
+    }
+}
+
+project('zip') {
+
+}
+
+project('app') {
+    apply plugin: 'application'
+    mainClassName = 'org.example.jpms.app/org.example.jpms.app.App'
+
+    dependencies {
+        implementation project(':zip')
+    }
+
+    run {
+        classpath new File(project(':huffman').buildDir, 'libs')
+        classpath new File(project(':lzw').buildDir, 'libs')
+
+        moduleOptions {
+            addModules = ['org.example.jpms.huffman', 'org.example.jpms.lzw']
+        }
+    }
+}
+
+project('huffman') {
+    dependencies {
+        implementation project(':zip')
+    }
+}
+
+project('lzw') {
+    dependencies {
+        implementation project(':zip')
+    }
+}

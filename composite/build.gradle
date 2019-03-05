@@ -1,0 +1,11 @@
+plugins {
+    id 'idea'
+}
+
+defaultTasks 'generateSlides'
+
+task generateSlides {
+    dependsOn gradle.includedBuild('slides').task(':clean')
+    dependsOn gradle.includedBuild('slides').task(':asciidoctor')
+    gradle.includedBuild('slides').task(':asciidoctor').resolveTask().mustRunAfter gradle.includedBuild('slides').task(':clean')
+}

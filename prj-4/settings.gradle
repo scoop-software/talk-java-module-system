@@ -1,0 +1,3 @@
+rootProject.name = 'prj-4'
+
+include 'app','zip', 'huffman', 'lzw'
