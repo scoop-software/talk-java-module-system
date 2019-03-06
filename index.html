@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html; charset=" http-equiv="Content-Type">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta content="Asciidoctor 1.5.8" name="generator">
+<title>The Java Module System in practice</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', prettyPrint)</script>
+<link href="deck.js/core/deck.core.css" rel="stylesheet">
+<link href="deck.js/extensions/scale/deck.scale.css" media="screen" rel="stylesheet">
+<link href="deck.js/extensions/goto/deck.goto.css" media="screen" rel="stylesheet">
+<link href="deck.js/extensions/menu/deck.menu.css" media="screen" rel="stylesheet">
+<link href="deck.js/extensions/navigation/deck.navigation.css" media="screen" rel="stylesheet">
+<link href="deck.js/themes/style/slides.css" media="screen" rel="stylesheet">
+<link href="deck.js/themes/transition/fade.css" media="screen" rel="stylesheet">
+<link href="deck.js/core/print.css" media="print" rel="stylesheet">
+<script src="deck.js/modernizr.custom.js"></script>
+</head>
+<body class="article">
+<div class="deck-container">
+<section class="slide" id="title-slide">
+<h1>The Java Module System in practice</h1>
+<span id="revnumber">version 1.0.0</span>
+</section>
+<section class="slide" id="_jdk_distributions">
+<h2>JDK Distributions</h2>
+<table class="tableblock frame-all grid-all" style="width:100%">
+<colgroup>
+<col style="width:11.1111%">
+<col style="width:11.1111%">
+<col style="width:22.2222%">
+<col style="width:22.2222%">
+<col style="width:11.1111%">
+<col style="width:11.1111%">
+<col style="width:11.1112%">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Release</th>
+<th class="tableblock halign-left valign-top">GA Date</th>
+<th class="tableblock halign-left valign-top">Oracle</th>
+<th class="tableblock halign-left valign-top">Azul</th>
+<th class="tableblock halign-left valign-top">RedHat</th>
+<th class="tableblock halign-left valign-top">AdoptOpenJDK</th>
+<th class="tableblock halign-left valign-top">Corretto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Java 8</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>03.2014</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>03.2022 (03.2025)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>03.2024 (03.2026)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>06.2023</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2023</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>06.2023</strong><sup>1</sup></strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java 9</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2017</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2020 (03.2021)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java 10</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2018</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Java 11</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2018</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2023 (09.2026)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2028 (09.2030)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>10.2024</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2022</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>08.2024</strong></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java 12</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2019</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2019</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2019</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2019</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java 13</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">09.2019</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2020</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2023 (03.2024)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">03.2020</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top" colspan="7"><p class="tableblock">&#8230;&#8203;</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Java 17</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2021</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2026 (09.2029)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>09.2031 (09.2033)</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>?</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>?</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>?</strong></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p> </p></div>
+<div class="paragraph"><p><sup>1</sup> This distribution also contains JavaFX</p></div>
+</section>
+<section class="slide" id="_the_java_module_system_history">
+<h2>The Java Module System - History</h2>
+<div class="ulist">
+<ul>
+<li class="slide">June 2005: <a href="https://jcp.org/en/jsr/detail?id=277">JSR-277: Java&#8482; Module System</a> created</li>
+<li class="slide">May 2006: <a href="https://jcp.org/en/jsr/detail?id=294">JSR-294: Improved Modularity Support in the Java&#8482; Programming Language</a> created</li>
+<li class="slide">August 2008: <a href="https://openjdk.java.net/projects/jigsaw/">Project Jigsaw</a> created</li>
+<li class="slide">July 2011: Java 7 released (without module system)</li>
+<li class="slide">July 2014: Java 8 released (without module system)</li>
+<li class="slide">November 2014: <a href="https://jcp.org/en/jsr/detail?id=376">JSR-376: Java&#8482; Platform Module System</a> created</li>
+<li class="slide">September 2015: Project Jigsaw releases its first prototype</li>
+<li class="slide">January 2016: JSR-277 and JSR-294 withdrawn</li>
+<li class="slide">July 2017: Project Jigsaw completed</li>
+<li class="slide">September 2017: Java 9 released with the module system</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_the_java_module_system_basics">
+<h2>The Java Module System - Basics</h2>
+<div class="ulist">
+<ul>
+<li class="slide"><strong>module</strong>: a named set of packages, resources, and native libraries</li>
+<li class="slide"><strong>modularization</strong>: the act of decomposing a system into self-contained but interconnected modules</li>
+</ul>
+</div>
+<div class="paragraph"><p>&nbsp;<br></p></div>
+<div class="paragraph"><p><span class="slide"><span class="note-right">&nbsp;Modularization is not mandatory.</span><br>&nbsp;<br></span></p></div>
+<div class="paragraph"><p><span class="slide"><span class="note-right">&nbsp;Partial modularization is also possible.</span></span></p></div>
+</section>
+<section class="slide" id="_the_java_module_system_features">
+<h2>The Java Module System - Features</h2>
+<div class="ulist">
+<ul>
+<li class="slide"><p>
+Strong encapsulation<div class="ulist">
+<ul>
+<li>a module is able to conceal parts of its code from other modules</li>
+<li>clear separation between publicly usable code and internal implementation code</li>
+</ul>
+</div></p></li>
+<li class="slide"><p>
+Well-defined interfaces<div class="ulist">
+<ul>
+<li>code that is not encapsulated is part of the pubic API of a module</li>
+<li>modules should expose well-defined and stable interfaces to other modules</li>
+</ul>
+</div></p></li>
+<li class="slide"><p>
+Explicit dependencies<div class="ulist">
+<ul>
+<li>dependencies must be part of the module definition</li>
+<li>explicit dependencies give rise to a module graph<br>
+&nbsp; &nbsp;  (cyclic dependencies not allowed)</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_java_se_modules_2010">
+<h2>Java SE Modules  (2010)</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="modules 2010" src="./img/modules-2010.png" width="2000">
+</div>
+</div>
+<div class="paragraph"><p><span class="small">Source: Marc Reinhold (<a class="bare" href="https://twitter.com/mreinhold/status/882644292036026368">https://twitter.com/mreinhold/status/882644292036026368</a>)</span></p></div>
+</section>
+<section class="slide" id="_java_se_modules_java_9">
+<h2>Java SE Modules  (Java 9)</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="modules java9" src="./img/modules-java9.jpg" width="2000">
+</div>
+</div>
+<div class="paragraph"><p><span class="small">Adapted from: Marc Reinhold (<a class="bare" href="https://twitter.com/mreinhold/status/882644292036026368">https://twitter.com/mreinhold/status/882644292036026368</a>)</span></p></div>
+</section>
+<section class="slide" id="_java_se_modules_java_9_2">
+<h2>Java SE Modules  (Java 9)</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="modules java9 deprecated" src="./img/modules-java9-deprecated.jpg" width="2000">
+</div>
+</div>
+<div class="paragraph"><p><span class="small">Adapted from: Marc Reinhold (<a class="bare" href="https://twitter.com/mreinhold/status/882644292036026368">https://twitter.com/mreinhold/status/882644292036026368</a>)</span></p></div>
+</section>
+<section class="slide" id="_java_se_modules_java_11">
+<h2>Java SE Modules  (Java 11)</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="modules java11" src="./img/modules-java11.jpg" width="2000">
+</div>
+</div>
+<div class="paragraph"><p><span class="small">Adapted from: Marc Reinhold (<a class="bare" href="https://twitter.com/mreinhold/status/882644292036026368">https://twitter.com/mreinhold/status/882644292036026368</a>)</span></p></div>
+</section>
+<section class="slide" id="_other_modules">
+<h2>Other modules</h2>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title"></div>
+</td>
+<td class="content">
+Modules shown in <span class="red">red color</span> have been removed in Java 11.<br>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph"><p> </p></div>
+<table class="tableblock frame-all grid-all" style="width:100%">
+<colgroup>
+<col style="width:20%">
+<col style="width:20%">
+<col style="width:20%">
+<col style="width:20%">
+<col style="width:20%">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top" colspan="5">JDK modules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>jdk.accessibility<br>
+jdk.attach<br>
+jdk.charsets<br>
+jdk.compiler<br>
+jdk.crypto.cryptoki<br>
+jdk.crypto.ec<br>
+jdk.dynalink<br>
+jdk.editpad<br>
+jdk.hotspot.agent</p></div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>jdk.httpserver<br>
+<span class="red">jdk.incubator.httpclient</span><sup>1</sup><br>
+jdk.jartool<br>
+jdk.javadoc<br>
+jdk.jcmd<br>
+jdk.jconsole<br>
+jdk.jdeps<br>
+jdk.jdi<br>
+jdk.jdwp.agent</p></div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>jdk.jfr<br>
+jdk.jlink<br>
+jdk.jshell<br>
+jdk.jsobject<br>
+jdk.jstatd<br>
+jdk.localedata<br>
+jdk.management<br>
+jdk.management.agent<br>
+<span class="red">jdk.management.cmm</span></p></div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>jdk.management.jfr<br>
+<span class="red">jdk.management.resource</span><br>
+jdk.naming.dns<br>
+jdk.naming.rmi<br>
+jdk.net<br>
+jdk.pack<br>
+<span class="red">jdk.packager.services</span><br>
+<span class="red">jdk.policytool</span><sup>2</sup><br>
+jdk.rmic</p></div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>jdk.scripting.nashorn<br>
+jdk.sctp<br>
+jdk.security.auth<br>
+jdk.security.jgss<br>
+<span class="red">jdk.snmp</span><br>
+jdk.xml.dom<br>
+jdk.zipfs</p></div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p><span class="small"><sup>1</sup> Promoted to Java SE as <em>java.net.http</em></span><br>
+<span class="small"><sup>2</sup> Removed in Java 10</span></p></div>
+<div class="ulist">
+<ul>
+<li><span class="red"><strong>JavaFX modules</strong></span> - removed in Java 11; available as standalone library: <a href="https://openjfx.io">OpenJFX</a></li>
+<li><strong>Other modules</strong>: <span class="red">java.jnlp</span>, java.smartcardio</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title"></div>
+</td>
+<td class="content">
+Execute <code>java --list-modules</code> to get the full list of platform modules.
+</td>
+</tr>
+</table>
+</div>
+</section>
+<section class="slide" id="_replacements_for_removed_modules">
+<h2>Replacements for removed modules</h2>
+<table class="tableblock frame-all grid-all" style="width:100%">
+<colgroup>
+<col style="width:16.6666%">
+<col style="width:33.3333%">
+<col style="width:50.0001%">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Module name</th>
+<th class="tableblock halign-left valign-middle">Package</th>
+<th class="tableblock halign-left valign-middle">Maven artifact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">java.activation</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.activation.*</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">com.sun.activation:javax.activation:1.2.0</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">java.corba</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.activity.*<br>
+javax.rmi.*<br>
+org.omg.*</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">org.jboss.openjdk-orb:openjdk-orb:8.1.2.Final</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">java.transaction</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.transaction.*</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.transaction:javax.transaction-api:1.3</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">java.xml.bind</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.xml.bind.*</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">org.glassfish.jaxb:jaxb-runtime:2.3.2</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">java.xml.ws</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.xml.ws.*<br>
+javax.jws.*<br>
+javax.soap.*</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">com.sun.xml.ws:jaxws-ri:2.3.2</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">java.xml.ws.annotation</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.annotation.*</p></td>
+<td class="tableblock halign-left valign-middle"><p class="tableblock">javax.annotation:javax.annotation-api:1.3.2</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide" id="_live_demo_dealing_with_removed_modules">
+<h2>Live demo - dealing with removed modules</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-1)</span></p></div>
+<div class="listingblock">
+<div class="title">Product.java <span class="small">(scroll to see more code)</span></div>
+<div class="content">
+<pre class="prettyprint scrollablecontent language-scrollablecontent"><code>package org.example.jpms;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class Product {
+    private int id;
+    private String name;
+    private double price; // Using double for money is actually a bad idea
+
+    public Product() {
+        this(-1, "", 0);
+    }
+
+    public Product(int id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return name + ": " + price;
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_live_demo_dealing_with_removed_modules_2">
+<h2>Live demo - dealing with removed modules</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-1)</span></p></div>
+<div class="listingblock">
+<div class="title">ProductTest.java</div>
+<div class="content">
+<pre class="prettyprint"><code>package org.example.jpms;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+public class ProductTest {
+    @Test
+    public void testToString() {
+        Product p = new Product(33, "spaghetti", 2.15);
+        Assertions.assertEquals("spaghetti: 2.15", p.toString());
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_live_demo_dealing_with_removed_modules_3">
+<h2>Live demo - dealing with removed modules</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-1)</span></p></div>
+<div class="listingblock">
+<div class="title">XMLPrinter.java</div>
+<div class="content">
+<pre class="prettyprint"><code>package org.example.jpms;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+
+public class XMLPrinter {
+    public static void main(String[] args) throws Exception {
+        Product product = new Product(100, "pizza", 3.25);
+
+        JAXBContext jaxbContext = JAXBContext.newInstance(Product.class);
+        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.marshal(product, System.out);
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_live_demo_dealing_with_removed_modules_4">
+<h2>Live demo - dealing with removed modules</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-1)</span></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">Execute:</div>
+<div class="content">
+<pre class="prettyprint"><code>./gradlew run</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">With JDK 8:</div>
+<div class="content">
+<pre class="prettyprint"><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;product&gt;
+    &lt;id&gt;100&lt;/id&gt;
+    &lt;name&gt;pizza&lt;/name&gt;
+    &lt;price&gt;3.25&lt;/price&gt;
+&lt;/product&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">With JDK 11:</div>
+<div class="content">
+<pre class="prettyprint bash language-bash"><code>Error: package javax.xml.bind.annotation does not exist</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">To fix the error, add to build.gradle:</div>
+<div class="content">
+<pre class="prettyprint"><code>implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.2'</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_module_descriptors">
+<h2>Module descriptors</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="module info" src="./img/module-info.png" width="804">
+</div>
+</div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:49%">
+<col style="width:2%">
+<col style="width:49%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>The module descriptor specifies:</p></div>
+<div class="ulist">
+<ul>
+<li>the module&#8217;s name (usually in reverse DNS notation)</li>
+<li>the module’s dependencies</li>
+<li>the packages made available to other modules</li>
+<li>the services used and provided by this module</li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>A type in one module is accessible by code<br>
+in another module only if:</p></div>
+<div class="ulist">
+<ul>
+<li>the type is public</li>
+<li>the package is exported</li>
+<li>the second module reads the first</li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div></div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide" id="_module_descriptors_2">
+<h2>Module descriptors</h2>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:62%">
+<col style="width:38%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>&nbsp;<br>
+module-info.java</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module java.prefs {
+    requires java.xml;
+
+    exports java.util.prefs;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li><em>java.prefs</em> can access types from the packages exported by <em>java.xml</em><br>
+(<em>java.prefs</em> <span class="purple">reads</span> the <em>java.xml</em> module)
+</div></section></li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li><em>java.prefs</em> exposes its <em>java.util.prefs</em> package to other modules
+</div></section></li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="imageblock thumb">
+<div class="content">
+<img alt="java.prefs" src="./img/java.prefs.png">
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide" id="_module_descriptors_3">
+<h2>Module descriptors</h2>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:62%">
+<col style="width:38%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>&nbsp;<br>
+module-info.java</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module java.datatransfer {
+    exports java.awt.datatransfer;
+
+    exports sun.datatransfer to java.desktop;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li><em>java.datatransfer</em> exposes the <em>java.awt.datatransfer</em> package to all other modules
+</div></section></li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li><p>
+<em>java.datatransfer</em> exposes the <em>sun.datatransfer</em> package only to the <em>java.desktop</em> module<div class="ulist">
+<ul>
+<li>This is a <strong>qualified export</strong>
+</div></section></li>
+</ul>
+</div></p></li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="imageblock thumb">
+<div class="content">
+<img alt="java.datatransfer" src="./img/java.datatransfer.png">
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide" id="_module_descriptors_implied_readability">
+<h2>Module descriptors - implied readability</h2>
+<div class="listingblock">
+<div class="title">java/sql/Driver.java</div>
+<div class="content">
+<pre class="prettyprint"><code>package java.sql;
+
+import java.util.logging.Logger;
+
+public interface Driver {
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException;
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p><span class="slide"><em>Driver</em> exposes types from the <em>java.logging</em> module in its own public API.</span></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:40%">
+<col style="width:5%">
+<col style="width:55%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">module-info.java</div>
+<div class="content">
+<pre class="prettyprint"><code>module java.sql {
+    requires transitive java.logging;
+    ...
+}</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-middle"><div><div class="paragraph"><p><em>java.sql</em> grants readability to <em>java.logging</em> to any module that depends upon it.</p></div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_aggregator_modules">
+<h2>Aggregator Modules</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="java.se.11" src="./img/java.se.11.jpg">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module java.se {
+    requires transitive java.compiler;
+    requires transitive java.datatransfer;
+    requires transitive java.desktop;
+    requires transitive java.instrument;
+    requires transitive java.logging;
+    requires transitive java.management;
+    ...
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_module_descriptors_services">
+<h2>Module descriptors: services</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-4)</span></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:56%">
+<col style="width:2%">
+<col style="width:42%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="ulist">
+<ul>
+<li>How can a modular application use some kind of plug-ins?</li>
+<li>How can a module be wired with other modules only during run-time?</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint slide language-slide"><code>public interface Compressor {
+    byte[] compress(byte[] data);
+    double getCompressionRatio();
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:49%">
+<col style="width:2%">
+<col style="width:49%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">module org.example.jpms.lzw</div>
+<div class="content">
+<pre class="prettyprint"><code>public class LZWCompressor
+                implements Compressor {
+    @Override
+    public double getCompressionRatio() {
+        return 0.48;
+    }
+    @Override
+    public byte[] compress(byte[] data) {
+        byte[] compressedData = null;
+        // ... (LZW implementation)
+        return compressedData;
+    }
+}</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">module org.example.jpms.huffman</div>
+<div class="content">
+<pre class="prettyprint"><code>public class HuffmanCompressor
+                implements Compressor {
+    @Override
+    public double getCompressionRatio() {
+        return 0.37;
+    }
+    @Override
+    public byte[] compress(byte[] data) {
+        byte[] compressedData = null;
+        // ... (Huffman implementation)
+        return compressedData;
+    }
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_module_descriptors_services_2">
+<h2>Module descriptors: services</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-4)</span></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:44%">
+<col style="width:1%">
+<col style="width:55%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms.zip {
+    exports org.example.jpms.zip;
+
+}</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public interface Compressor {
+    byte[] compress(byte[] data);
+    double getCompressionRatio();
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import org.example.jpms.zip.Compressor;
+
+module org.example.jpms.lzw {
+    requires org.example.jpms.zip;
+    provides Compressor with org.example.jpms.lzw.LZWCompressor;
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>import org.example.jpms.zip.Compressor;
+
+module org.example.jpms.huffman {
+    requires org.example.jpms.zip;
+    provides Compressor with org.example.jpms.huffman.HuffmanCompressor;
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_module_descriptors_services_3">
+<h2>Module descriptors: services</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-4)</span></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:44%">
+<col style="width:1%">
+<col style="width:55%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms.zip {
+    exports org.example.jpms.zip;
+
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms.app {
+    requires org.example.jpms.zip;
+    uses Compressor;
+}</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public interface Compressor {
+    byte[] compress(byte[] data);
+    double getCompressionRatio();
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class App {
+    public static void main(String[] args) {
+        for(Compressor compressor: ServiceLoader.load(Compressor.class)) {
+            System.out.println(compressor.getClass().getSimpleName() +
+                    " (" + compressor.getCompressionRatio() + ")");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_module_descriptors_services_4">
+<h2>Module descriptors: services</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-5)</span></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:44%">
+<col style="width:1%">
+<col style="width:55%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms.zip {
+    exports org.example.jpms.zip;
+    uses Compressor;
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms.app {
+    requires org.example.jpms.zip;
+
+}</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public interface Compressor {
+    byte[] compress(byte[] data);
+    double getCompressionRatio();
+
+    static Iterable&lt;Compressor&gt; getCompressors() {
+        return ServiceLoader.load(Compressor.class);
+    }
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public class App {
+    public static void main(String[] args) {
+        for(Compressor compressor: Compressor.getCompressors()) {
+            System.out.println(compressor.getClass().getSimpleName() +
+                    " (" + compressor.getCompressionRatio() + ")");
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_opening_modules_for_deep_reflection">
+<h2>Opening modules for deep reflection</h2>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:44%">
+<col style="width:1%">
+<col style="width:55%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p>Popular tools that use reflection:</p></div>
+<div class="ulist">
+<ul>
+<li>Spring (dependency injection)</li>
+<li>JUnit (unit test execution)</li>
+<li>Hibernate (persistence)</li>
+<li>Copper (workflow processing)</li>
+<li>JAXB (XML serialization)</li>
+<li>Jackson (JSON serialization)</li>
+<li>FindBugs / SpotBugs (code analysis)</li>
+<li>any other tools that process annotations</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p><section class="slide"><div>
+A module needs to be able to:</p></div>
+<div class="ulist">
+<ul>
+<li>provide access to internal types without exporting packages</li>
+<li>allow reflective access to <strong>all</strong> parts of these types<br>
+(<em>exports</em> doesn&#8217;t solve this problem)
+</div></section></li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide" id="_opening_modules_for_deep_reflection_2">
+<h2>Opening modules for deep reflection</h2>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:28.9999%">
+<col style="width:1%">
+<col style="width:70.0001%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>@XmlRootElement
+public class Product {
+    private int id;
+    private String name;
+    private double price;
+
+    ...
+
+}</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>public static void main(String[] args) throws Exception {
+    Product product = new Product(100, "pizza", 3.25);
+    JAXBContext jaxbContext =
+                    JAXBContext.newInstance(Product.class);
+    Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+    jaxbMarshaller.setProperty(
+                    Marshaller.JAXB_FORMATTED_OUTPUT, true);
+    jaxbMarshaller.marshal(product, System.out);
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms {
+    requires java.xml.bind;
+    opens org.example.jpms to java.xml.bind;
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>It&#8217;s not necessary to export the <em>org.example.jpms</em> package
+</div></section></li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_opening_modules_for_deep_reflection_3">
+<h2>Opening modules for deep reflection</h2>
+<div class="listingblock">
+<div class="title">Making a module open</div>
+<div class="content">
+<pre class="prettyprint"><code>open module org.example.jpms {
+    ....
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p>&nbsp;<br></p></div>
+<div class="listingblock">
+<div class="title">Making a package open for all modules</div>
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms {
+    opens org.example.jpms.impl;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p>&nbsp;<br></p></div>
+<div class="listingblock">
+<div class="title">Qualified <em>opens</em></div>
+<div class="content">
+<pre class="prettyprint"><code>module org.example.jpms {
+    opens org.example.jpms.impl to org.example.tool;
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_vm_arguments_to_break_encapsulation">
+<h2>VM arguments to break encapsulation</h2>
+<div class="paragraph"><p>Options for the <code>javac</code> and <code>java</code> tools:</p></div>
+<div class="ulist">
+<ul>
+<li class="slide"><span class="bold"><code>--add-exports module/package=other-module(,other-module)*</code></span><br>
+Specifies a package to be considered as exported from its defining module to additional modules.<br>
+&nbsp;<br><br>
+&nbsp;<br></li>
+<li class="slide"><span class="bold"><code>--add-reads module=other-module(,other-module)*</code></span><br>
+Specifies additional modules to be considered as required by a given module.<br>
+&nbsp;<br><br>
+&nbsp;<br></li>
+<li class="slide"><span class="bold"><code>--add-opens module/package=target-module(,target-module)*</code></span><br>
+Updates module to open package to target-module, regardless of module declaration.<br>
+(has no effect on javac)</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_classpath_and_module_path">
+<h2>Classpath and module path</h2>
+<div class="paragraph"><p>Modules are resolved from the <strong>module path</strong>.</p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li><strong>classpath</strong>: allows managing the available types only as a flat list</li>
+<li><p>
+<strong>module path</strong>: allows efficient indexing based on information from the module descriptors<div class="ulist">
+<ul>
+<li>The Java runtime and the compiler know in which module to look for a given type</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>Specifying the module path with the <code>javac</code> and <code>java</code> tools:</p></div>
+<div class="paragraph"><p><span class="bold"><code>--module-path modulepath&#8230;&#8203;</code></span><br>
+&nbsp; &nbsp;  or<br>
+<span class="bold"><code>-p modulepath&#8230;&#8203;</code></span></p></div>
+<div class="paragraph"><p>&nbsp; &nbsp;  <em>modulepath</em>: a list of directories of modules (containing exploded modules, modular jars or jmod files).</p></div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_classpath_and_module_path_2">
+<h2>Classpath and module path</h2>
+<div class="paragraph"><p>You can mix <code>--class-path</code> and <code>--module-path</code>.</p></div>
+<div class="ulist">
+<ul>
+<li>modular jar on the module-path</li>
+<li>modular jar on the classpath</li>
+<li>non-modular jar on the module-path</li>
+<li>non-modular jar on the classpath</li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div>
+All code on the classpath is part of the <strong>unnamed module</strong>, which:</p></div>
+<div class="ulist">
+<ul>
+<li>exports all code on the classpath</li>
+<li>reads all other modules</li>
+<li>it is readable only from <em>automatic modules</em>!</li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_automatic_modules">
+<h2>Automatic modules</h2>
+<div class="paragraph"><p>Non-modular jars found on the module-path are turned into <strong>automatic modules</strong>.</p></div>
+<div class="ulist">
+<ul>
+<li class="slide"><p>
+A module descriptor is generated on the fly<div class="ulist">
+<ul>
+<li>it <code>requires transitive</code> all other resolved modules</li>
+<li>it exports all its packages</li>
+<li>it reads the <em>unnamed module</em></li>
+</ul>
+</div></p></li>
+<li class="slide"><p>
+The name of the automatic module:<div class="ulist">
+<ul>
+<li>if present: the <code>Automatic-Module-Name</code> attribute of the <code>META-INF/MANIFEST.MF</code> file<br>
+(highly recommended in order to prevent the <a href="https://blog.joda.org/2017/05/java-se-9-jpms-automatic-modules.html">module hell</a>)</li>
+<li>otherwise: derived from the jar&#8217;s name</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_split_packages">
+<h2>Split packages</h2>
+<div class="ulist">
+<ul>
+<li class="slide">Packages are not allowed to span different modules.<br>
+&nbsp; &nbsp;  (This applies even for packages that are not exported.)</li>
+<li class="slide">No classes are allowed in the default package.</li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div>
+Dealing with split packages using the <code>javac</code> and <code>java</code> tools:</p></div>
+<div class="paragraph"><p><span class="bold"><code>--patch-module module=file(:file)*</code></span><br>
+&nbsp; &nbsp;  Merges all classes from a list of files into the given module.</p></div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">Example:</div>
+<div class="content">
+<pre class="prettyprint html language-html"><code>java
+  --module-path ...
+  --add-modules ...
+  --patch-module java.xml.ws.annotation=/path/to/my/lib/jsr305-3.0.2.jar
+  --module org.example.hello/org.example.hello.HelloWorld</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_live_demo_gradle_without_the_moduleplugin">
+<h2>Live demo: Gradle without the <em>moduleplugin</em></h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-2)</span></p></div>
+<div class="paragraph"><p><strong>Several adjustments need to be made to build.gradle</strong></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">To allow compilation:</div>
+<div class="content">
+<pre class="prettyprint"><code>compileJava {
+    doFirst {
+        options.compilerArgs = ['--module-path', classpath.asPath]
+        classpath = files()
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="listingblock">
+<div class="title">To allow running:</div>
+<div class="content">
+<pre class="prettyprint"><code>run {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', moduleName
+        ]
+        classpath = files()
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_live_demo_gradle_without_the_moduleplugin_2">
+<h2>Live demo: Gradle without the <em>moduleplugin</em></h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-2)</span></p></div>
+<div class="listingblock">
+<div class="title">To allow testing:</div>
+<div class="content">
+<pre class="prettyprint"><code>compileTestJava {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'org.junit.jupiter.api',
+                '--add-reads', "$moduleName=org.junit.jupiter.api",
+                '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
+        ]
+        classpath = files()
+    }
+}
+
+test {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'ALL-MODULE-PATH',
+                '--add-reads', "$moduleName=org.junit.jupiter.api",
+                '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
+                '--add-opens', "$moduleName/org.example.jpms=org.junit.platform.commons"
+        ]
+        classpath = files()
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_live_demo_gradle_without_the_moduleplugin_3">
+<h2>Live demo: Gradle without the <em>moduleplugin</em></h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-2)</span></p></div>
+<div class="listingblock">
+<div class="title">To fix the start scripts:</div>
+<div class="content">
+<pre class="prettyprint"><code>import java.util.regex.Matcher
+startScripts {
+    inputs.property("moduleName", moduleName)
+    doFirst {
+        defaultJvmOpts = [
+                '--module-path', 'LIB_DIR_PLACEHOLDER',
+                '--add-modules', moduleName,
+        ]
+    }
+
+    doLast{
+        def bashFile = new File(outputDir, applicationName)
+        String bashContent = bashFile.text
+        bashFile.text = bashContent.replaceFirst('LIB_DIR_PLACEHOLDER',
+                                        Matcher.quoteReplacement('$APP_HOME/lib'))
+
+        def batFile = new File(outputDir, applicationName + ".bat")
+        String batContent = batFile.text
+        batFile.text = batContent.replaceFirst('LIB_DIR_PLACEHOLDER',
+                                        Matcher.quoteReplacement('%APP_HOME%\\lib'))
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_live_demo_gradle_with_the_moduleplugin">
+<h2>Live demo: Gradle with the <em>moduleplugin</em></h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-2)</span></p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>plugins {
+    id 'application'
+    id "org.javamodularity.moduleplugin" version "1.4.0"
+}
+
+repositories {
+    jcenter()
+}
+
+ext.moduleName = 'org.example.jpms'
+mainClassName = 'org.example.jpms.XMLPrinter'
+
+dependencies {
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_live_demo_gradle_with_the_moduleplugin_2">
+<h2>Live demo: Gradle with the <em>moduleplugin</em></h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-3)</span></p></div>
+<div class="paragraph"><p>Configuring additional VM arguments for testing</p></div>
+<div class="listingblock">
+<div class="title">module-info.test</div>
+<div class="content">
+<pre class="prettyprint"><code>--add-modules
+  java.logging
+
+--add-reads
+  org.example.jpms=java.logging</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_modular_jars_compatible_with_java_8_or_earlier">
+<h2>Modular jars compatible with Java 8 (or earlier)</h2>
+<div class="paragraph"><p><strong>The "standard" approach</strong></p></div>
+<div class="ulist">
+<ul>
+<li class="slide"><p>
+from the build script start a GradleBuild task that executes <code>gradle jar</code> with a sourceSet that includes all classes except <code>module-info.java</code>.<div class="ulist">
+<ul>
+<li>this GradleBuild task runs in Java 8 (or older) compatibility mode.</li>
+</ul>
+</div></p></li>
+<li class="slide"><p>
+from the build script start a GradleBuild task that executes <code>gradle jar</code> with a sourceSet that includes only <code>module-info.java</code>.<div class="ulist">
+<ul>
+<li>this GradleBuild task runs in Java 9 (or newer) compatibility mode.</li>
+<li>the classpath of the java compiler needs to include the (Java 8 or older) jar assembled in the previous step.</li>
+</ul>
+</div></p></li>
+<li class="slide">merge the above two jars into a single one.</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_modular_jars_compatible_with_java_8_or_earlier_2">
+<h2>Modular jars compatible with Java 8 (or earlier)</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-6)</span></p></div>
+<div class="paragraph"><p><strong>The <a href="https://github.com/moditect/moditect/blob/master/README.md#adding-a-module-descriptor-to-the-project-jar">ModiTect</a> approach</strong></p></div>
+<div class="ulist">
+<ul>
+<li>analyze the <code>module-info.java</code> file with the <a href="https://github.com/javaparser/javaparser">JavaParser</a></li>
+<li>use the <a href="https://asm.ow2.io/">ASM</a> bytecode manipulation framework to generate the corresponding module descriptor</li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>Usage with the <a href="https://github.com/beryx/badass-jar-plugin/blob/master/README.adoc">org.beryx.jar</a> Gradle plugin</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>plugins {
+    id 'java'
+    id 'org.beryx.jar' version '1.1.3'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8</code></pre>
+</div>
+</div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:39%">
+<col style="width:1%">
+<col style="width:60%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">Create Java 8-compatible jar</div>
+<div class="content">
+<pre class="prettyprint"><code>./gradlew jar</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">Validate the module descriptor by building with Java 11</div>
+<div class="content">
+<pre class="prettyprint"><code>./gradlew -PjavaCompatibility=11 jar</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_multi_release_jars">
+<h2>Multi-release jars</h2>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li>this feature allows packaging different versions of the same class file inside a single jar</li>
+<li>at run-time, the JVM loads the most appropriate version</li>
+<li>this feature is independent of the module system</li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="ulist">
+<ul>
+<li>the MANIFEST.MF of a multi-release jar contains the attribute <strong><code>Multi-Release: true</code></strong></li>
+<li>new versions of a class reside in the <strong><code>META-INF/versions/&lt;n&gt;</code></strong> directory, where <code>&lt;n&gt;</code> is a major Java version.</li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:60%">
+<col style="width:1%">
+<col style="width:39%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>The <strong><code>org.beryx.jar</code></strong> plugin creates multi-release jars by default</p></div>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="multi release jar" src="./img/multi-release-jar.png" width="822">
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>How to prevent creating multi-release jars with the <strong><code>org.beryx.jar</code></strong> plugin:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint"><code>jar {
+    ...
+    multiRelease = false
+    ...
+}</code></pre>
+</div>
+</div>
+<div class="paragraph"><p></div></section></p></div></div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="slide" id="_other_jdk_tools">
+<h2>Other JDK tools</h2>
+<div class="ulist">
+<ul>
+<li class="slide">jdeps - shows the package-level or class-level dependencies of Java class files<br>
+&nbsp; &nbsp;  - can also be used to generate <code>module-info.java</code> files for the analyzed jars</li>
+<li class="slide">jlink - assembles and optimizes a set of modules and their dependencies into a custom runtime image<br>
+&nbsp; &nbsp;  - a custom runtime image is a special distribution containing the bare minimum to run an application<br>
+&nbsp; &nbsp;  - you can create your own JRE<br>
+&nbsp; &nbsp;  - you can use jlink only if all artifacts in the dependency graph are modularized!</li>
+<li class="slide">jdeprscan - scans a jar file for uses of deprecated API elements</li>
+<li class="slide">jmod - creates JMOD files and lists the content of existing JMOD files</li>
+<li class="slide">jimage - analyzes the lib/module file found in a custom runtime image</li>
+</ul>
+</div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications">
+<h2>Custom runtime images for modular applications</h2>
+<div class="paragraph"><p><strong>The ModiTect approach:</strong></p></div>
+<div class="ulist">
+<ul>
+<li><p>
+for each non-modularized artifact in the dependency graph:<div class="ulist">
+<ul>
+<li>generate a module descriptor and add it to the artifact</li>
+</ul>
+</div></p></li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>ModiTect can be used with both Maven and Gradle.</p></div>
+<table class="tableblock frame-none grid-none" style="width:100%">
+<colgroup>
+<col style="width:49%">
+<col style="width:2%">
+<col style="width:49%">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">Maven</div>
+<div class="content">
+<pre class="prettyprint"><code>&lt;plugins&gt;
+  &lt;plugin&gt;
+    &lt;groupId&gt;org.moditect&lt;/groupId&gt;
+    &lt;artifactId&gt;
+      moditect-maven-plugin
+    &lt;/artifactId&gt;
+	  &lt;executions&gt;
+	  ...
+	  &lt;/executions&gt;
+  &lt;/plugin&gt;
+  ...
+&lt;/plugins&gt;</code></pre>
+</div>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div></div></td>
+<td class="tableblock halign-left valign-top"><div><div class="listingblock">
+<div class="title">Gradle</div>
+<div class="content">
+<pre class="prettyprint"><code>plugins{
+    id "java"
+    id "application"
+
+    id "org.moditect.gradleplugin"
+                       version "1.0.0-beta1"
+    ...
+}
+
+moditect {
+    ...
+}</code></pre>
+</div>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications_2">
+<h2>Custom runtime images for modular applications</h2>
+<div class="paragraph"><p><strong>The ModiTect approach</strong>
+<span class="headnote">(Code from prj-7)</span></p></div>
+<div class="listingblock">
+<div class="title">build.gradle <span class="small">(scroll to see more code)</span></div>
+<div class="content">
+<pre class="prettyprint scrollablecontent language-scrollablecontent"><code>buildscript {
+  repositories {
+      maven {
+        url "https://plugins.gradle.org/m2/"
+      }
+      maven {
+        url 'https://jitpack.io'
+      }
+  }
+  dependencies {
+    classpath "org.moditect:moditect-gradle-plugin:1.0.0-beta1"
+  }
+}
+
+plugins{
+    id "java"
+    id "application"
+}
+apply plugin: "org.moditect.gradleplugin"
+
+repositories {
+    mavenCentral()
+}
+
+group = "org.moditect"
+version = "2.0.0"
+
+targetCompatibility = JavaVersion.VERSION_1_9
+sourceCompatibility = JavaVersion.VERSION_1_9
+
+ext {
+    moduleName = 'com.example'
+
+    vertxVersion = '3.5.0'
+    nettyVersion = '4.1.15.Final'
+    jacksonVersion ='2.9.0'
+}
+
+mainClassName = 'com.example.HelloWorldServer'
+jar {
+    manifest {
+        attributes("Automatic-Module-Name": moduleName)
+    }
+}
+
+dependencies{
+    compile "io.vertx:vertx-core:$vertxVersion"
+}
+
+moditect {
+    addMainModuleInfo {
+        version = project.version
+        overwriteExistingFiles = false
+        jdepsExtraArgs = ['-q']
+        module {
+            mainClass = mainClassName
+            moduleInfo {
+                name = moduleName
+                exports = 'com.example to io.vertx.core;'
+            }
+        }
+    }
+    addDependenciesModuleInfo {
+        jdepsExtraArgs = ['-q']
+        modules {
+            module {
+                artifact "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+                moduleInfo {
+                    name = 'com.fasterxml.jackson.core'
+                }
+            }
+            module {
+                artifact "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+                moduleInfo {
+                    name = 'com.fasterxml.jackson.annotations'
+                }
+            }
+            module {
+                artifact "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+                moduleInfo {
+                    name = 'com.fasterxml.jackson.databind'
+                }
+            }
+            module {
+                artifact "io.netty:netty-common:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.common'
+                }
+            }
+            module {
+                artifact "io.netty:netty-buffer:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.buffer'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec'
+                }
+            }
+            module {
+                artifact "io.netty:netty-resolver:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.resolver'
+                }
+            }
+            module {
+                artifact "io.netty:netty-transport:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.transport'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec-dns:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.dns'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec-http2:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.http2'
+                }
+            }
+            module {
+                artifact "io.netty:netty-resolver-dns:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.resolver.dns'
+                }
+            }
+            module {
+                artifact "io.netty:netty-transport-native-unix-common:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.channel.unix'
+                }
+            }
+            module {
+                artifact "io.netty:netty-transport-native-epoll:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.channel.epoll'
+                }
+
+            }
+            module {
+                artifact "io.netty:netty-transport-native-kqueue:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.channel.kqueue'
+                }
+            }
+            module {
+                artifact "io.netty:netty-handler:$nettyVersion"
+                moduleInfoSource = '''
+                    module io.netty.handler {
+                        exports io.netty.handler.flow;
+                        exports io.netty.handler.flush;
+                        exports io.netty.handler.ipfilter;
+                        exports io.netty.handler.logging;
+                        exports io.netty.handler.ssl;
+                        exports io.netty.handler.ssl.ocsp;
+                        exports io.netty.handler.ssl.util;
+                        exports io.netty.handler.stream;
+                        exports io.netty.handler.timeout;
+                        exports io.netty.handler.traffic;
+                    }
+                '''
+            }
+            module {
+                artifact "io.netty:netty-codec-socks:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.socks'
+                }
+            }
+            module {
+                artifact "io.netty:netty-handler-proxy:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.handler.proxy'
+                }
+            }
+            module {
+                artifact "io.netty:netty-codec-http:$nettyVersion"
+                moduleInfo {
+                    name = 'io.netty.codec.http'
+                }
+            }
+            module {
+                artifact "io.vertx:vertx-core:$vertxVersion"
+                moduleInfo {
+                    name = 'io.vertx.core'
+                    requires = '''
+                        static log4j.api;
+                        static log4j;
+                        static slf4j.api;
+                        *;
+                    '''
+                    exports = '''
+                        !*impl*;
+                        *;
+                    '''
+                    uses = '''
+                        io.vertx.core.spi.VertxFactory;
+                        io.vertx.core.spi.VerticleFactory;
+                        io.vertx.core.spi.FutureFactory;
+                        io.vertx.core.spi.BufferFactory;
+                    '''
+                }
+            }
+        }
+    }
+    createRuntimeImage {
+        outputDirectory = file("$buildDir/jlink-image")
+        modules = ['com.example']
+        launcher {
+            name = 'helloWorld'
+            module = 'com.example'
+        }
+        compression = 2
+        stripDebug = true
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications_3">
+<h2>Custom runtime images for modular applications</h2>
+<div class="paragraph"><p><strong>The "badass" approach</strong></p></div>
+<div class="ulist">
+<ul>
+<li>Combine all non-modular artifacts into a <em>merged module</em>.</li>
+<li>Modularize the merged module.</li>
+<li>Create <em>delegating modules</em> for each artifact contained in the merged module.</li>
+</ul>
+</div>
+<div class="paragraph"><p>&nbsp;<br></p></div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>This approach is taken by the <a href="https://github.com/beryx/badass-jlink-plugin/blob/master/README.md">badass-jlink</a> Gradle plugin.</p></div>
+<div class="ulist">
+<ul>
+<li>You can let the plugin generate a module descriptor for the merged module.</li>
+<li>Or you can use the module descriptor suggested by the plugin as a starting point for a customized module descriptor.</li>
+<li>The plugin doesn&#8217;t use <em>jdeps</em> to generate the module descriptor, because jdeps has some limitations and bugs.</li>
+</ul>
+</div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications_4">
+<h2>Custom runtime images for modular applications</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="merging" src="./img/merging.png">
+</div>
+</div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications_5">
+<h2>Custom runtime images for modular applications</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="merging.cycle" src="./img/merging.cycle.png">
+</div>
+</div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications_6">
+<h2>Custom runtime images for modular applications</h2>
+<div class="imageblock thumb">
+<div class="content">
+<img alt="merging.no cycle" src="./img/merging.no-cycle.png">
+</div>
+</div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_modular_applications_7">
+<h2>Custom runtime images for modular applications</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-8)</span></p></div>
+<div class="listingblock">
+<div class="title">build.gradle for the "badass" approach</div>
+<div class="content">
+<pre class="prettyprint"><code>plugins {
+    id 'application'
+    id "org.javamodularity.moduleplugin" version "1.4.0"
+    id 'org.beryx.jlink' version '2.5.0'
+}
+repositories {
+    jcenter()
+}
+dependencies {
+    implementation "io.vertx:vertx-core:3.5.0"
+}
+ext.moduleName = 'com.example'
+mainClassName = "com.example/com.example.HelloWorldServer"
+
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    mergedModule {
+        additive = true
+        uses 'io.vertx.core.spi.VertxFactory'
+        uses 'io.vertx.core.spi.VerticleFactory'
+        uses 'io.vertx.core.spi.FutureFactory'
+        uses 'io.vertx.core.spi.BufferFactory'
+    }
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_non_modular_applications">
+<h2>Custom runtime images for non-modular applications</h2>
+<div class="paragraph"><p>Approach:</p></div>
+<div class="ulist">
+<ul>
+<li>create a custom runtime image containing only the JDK modules required by the application</li>
+<li>use the Gradle Application Plugin to build your application</li>
+<li>add your application to the custom Java runtime image</li>
+</ul>
+</div>
+<div class="paragraph"><p><section class="slide"><div></p></div>
+<div class="paragraph"><p>This approach is taken by the <a href="https://github.com/beryx/badass-runtime-plugin/blob/master/README.md">badass-runtime</a> Gradle plugin.</p></div>
+<div class="paragraph"><p></div></section></p></div>
+</section>
+<section class="slide" id="_custom_runtime_images_for_non_modular_applications_2">
+<h2>Custom runtime images for non-modular applications</h2>
+<div class="paragraph"><p><span class="headnote">(Code from prj-9)</span></p></div>
+<div class="listingblock">
+<div class="title">build.gradle</div>
+<div class="content">
+<pre class="prettyprint"><code>plugins {
+    id 'application'
+    id "org.beryx.runtime" version "1.1.5"
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    implementation "io.vertx:vertx-core:3.5.0"
+}
+
+mainClassName = "com.example.HelloWorldServer"
+
+runtime {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    modules = ['java.naming', 'java.compiler', 'java.logging', 'jdk.unsupported']
+}</code></pre>
+</div>
+</div>
+</section>
+<section class="slide" id="_list_of_useful_plugins">
+<h2>List of useful plugins</h2>
+<div class="ulist">
+<ul>
+<li><a class="bare" href="https://github.com/aalmiray/jdeps-gradle-plugin">https://github.com/aalmiray/jdeps-gradle-plugin</a></li>
+<li><a class="bare" href="https://github.com/aalmiray/jdeprscan-gradle-plugin">https://github.com/aalmiray/jdeprscan-gradle-plugin</a></li>
+<li><a class="bare" href="https://github.com/jonnyzzz/gradle-java9c">https://github.com/jonnyzzz/gradle-java9c</a></li>
+<li><a class="bare" href="https://github.com/java9-modularity/gradle-modules-plugin">https://github.com/java9-modularity/gradle-modules-plugin</a></li>
+<li><a class="bare" href="https://github.com/openjfx/javafx-gradle-plugin">https://github.com/openjfx/javafx-gradle-plugin</a></li>
+<li><a class="bare" href="https://github.com/moditect/moditect">https://github.com/moditect/moditect</a></li>
+<li><a class="bare" href="https://github.com/moditect/moditect-gradle-plugin">https://github.com/moditect/moditect-gradle-plugin</a></li>
+<li><a class="bare" href="https://github.com/beryx/badass-jar-plugin">https://github.com/beryx/badass-jar-plugin</a></li>
+<li><a class="bare" href="https://github.com/beryx/badass-jlink-plugin">https://github.com/beryx/badass-jlink-plugin</a></li>
+<li><a class="bare" href="https://github.com/beryx/badass-runtime-plugin">https://github.com/beryx/badass-runtime-plugin</a></li>
+</ul>
+</div>
+</section>
+<div aria-role="navigation">
+<a class="deck-prev-link" href="#" title="Previous">&#8592;</a>
+<a class="deck-next-link" href="#" title="Next">&#8594;</a>
+</div>
+<form action="." class="goto-form" method="get">
+<label for="goto-slide">Go to Slide:</label>
+<input id="goto-slide" list="goto-datalist" name="slidenum" type="text">
+<datalist id="goto-data-list"></datalist>
+<input type="submit" value="Go">
+</form>
+</div>
+<script src="deck.js/jquery.min.js"></script>
+<script src="deck.js/core/deck.core.js"></script>
+<script src="deck.js/extensions/scale/deck.scale.js"></script>
+<script src="deck.js/extensions/goto/deck.goto.js"></script>
+<script src="deck.js/extensions/menu/deck.menu.js"></script>
+<script src="deck.js/extensions/navigation/deck.navigation.js"></script>
+<script>
+  (function($, deck, undefined) {
+    $.deck.defaults.keys['previous'] = [8, 33, 37, 39];
+    $.deck.defaults.keys['next'] = [13, 32, 34, 39];
+  
+    $.extend(true, $[deck].defaults, {
+        countNested: false
+    });
+  
+    $.deck('.slide');
+  })(jQuery, 'deck');
+</script>
+<style>
+  .slide.canvas-image {
+  -moz-background-size: cover;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  display: -moz-box;
+  display: -webkit-box;
+  display: -ms-box;
+  display: box;
+  -moz-box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -ms-box-orient: vertical;
+  box-orient: vertical;
+  -moz-box-align: start;
+  -webkit-box-align: start;
+  -ms-box-align: start;
+  box-align: start;
+  -moz-box-pack: start;
+  -webkit-box-pack: start;
+  -ms-box-pack: start;
+  box-pack: start;}
+  
+  .bottom-left {
+    left: 1%;
+    bottom: 20%; }
+  
+  .top-left {
+    left: 1%;
+    top: 20%; }
+  
+  .bottom-right {
+    right: 1%;
+    bottom: 20%; }
+  
+  .top-right {
+    right: 1%;
+    top: 20%; }
+  
+  .center-up {
+    right: 50%;
+    top: 1%;
+  }
+  
+  .center-down {
+    right: 50%;
+    bottom: 1%;
+  }
+  .canvas-image .canvas-caption p {
+    text-align: center;
+    padding-top: 0;
+    padding: 0;
+    -moz-transform: none;
+    -webkit-transform: none;
+    -o-transform: none;
+    -ms-transform: none;
+    transform: none;
+    display: inline;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+    font-size: 58px;
+    -webkit-box-shadow: 2px 2px 2px #000;
+    -moz-box-shadow: 2px 2px 2px #000;
+    box-shadow: 2px 2px 2px #000;
+    padding: 1rem;
+    color: white; }
+  kbd.keyseq { color: #555555; }
+  kbd:not(.keyseq) {
+    display: inline-block;
+    color: #222222;
+    font-size: 0.7em;
+    line-height: 1.4;
+    background-color: #F7F7F7;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 0 0 2px white inset;
+    margin: -0.15em 0.15em 0 0.15em;
+    padding: 0.2em 0.6em;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  kbd kbd:first-child { margin-left: 0; }
+  kbd kbd:last-child { margin-right: 0; }
+</style>
+</body>
+</html>
